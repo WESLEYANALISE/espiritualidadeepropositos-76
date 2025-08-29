@@ -5,8 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, BookOpen, Download, X, Heart, Crown, Timer, Lock, Plus } from "lucide-react";
 import { AddToReadingPlan } from './AddToReadingPlan';
 import { YouTubePlayer } from "./YouTubePlayer";
-import { AITeacher } from "./AITeacher";
-import { FloatingTeacherButton } from "./FloatingTeacherButton";
+import { useReadingProgress } from "@/hooks/useReadingProgress";
 import { isYouTubeUrl, extractYouTubeId } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,8 +33,7 @@ export const BookDetail = ({
   const [countdown, setCountdown] = useState(30);
   const [canReadToday, setCanReadToday] = useState(true);
   const [hasUsedFreeRead, setHasUsedFreeRead] = useState(false);
-  const [showAITeacher, setShowAITeacher] = useState(false);
-  const [showFloatingButton, setShowFloatingButton] = useState(false);
+  const { readingProgress, markAsReading, stopReading } = useReadingProgress();
   useEffect(() => {
     window.scrollTo(0, 0);
     checkDailyFreeRead();
@@ -96,10 +94,6 @@ export const BookDetail = ({
   };
 
   const startReading = () => {
-    // Show AI Teacher when starting to read
-    setShowAITeacher(true);
-    setShowFloatingButton(true);
-    
     if (book.link) {
       if (isYouTubeUrl(book.link)) {
         const id = extractYouTubeId(book.link);
@@ -154,15 +148,30 @@ export const BookDetail = ({
   };
   if (showReader) {
     return <div className="fixed inset-0 bg-background z-50">
-        <Button onClick={() => {
-        setShowReader(false);
-        setContentUrl(null);
-        setVideoId(null);
-        setIsVideo(false);
-      }} className="fixed top-4 right-4 z-60 bg-primary/20 backdrop-blur-sm border border-primary/30 text-foreground hover:bg-primary/30">
-          <X className="h-4 w-4 mr-2" />
-          Fechar
-        </Button>
+        <div className="fixed top-4 left-4 right-4 z-60 flex justify-between">
+          <Button 
+            onClick={async () => {
+              await markAsReading(book.id);
+              toast({
+                title: 'Livro marcado como lendo',
+                description: 'Você pode ver seus livros em andamento na página "Lendo".',
+              });
+            }}
+            className="bg-primary/20 backdrop-blur-sm border border-primary/30 text-foreground hover:bg-primary/30"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Lendo
+          </Button>
+          <Button onClick={() => {
+            setShowReader(false);
+            setContentUrl(null);
+            setVideoId(null);
+            setIsVideo(false);
+          }} className="bg-primary/20 backdrop-blur-sm border border-primary/30 text-foreground hover:bg-primary/30">
+            <X className="h-4 w-4 mr-2" />
+            Fechar
+          </Button>
+        </div>
         <div className="w-full h-full">
           <div className="w-full h-full">
             {isVideo && videoId ? <YouTubePlayer videoId={videoId} onVideoEnd={() => setShowReader(false)} onVideoStart={() => {}} /> : contentUrl ? <iframe src={contentUrl} className="w-full h-full border-0" title={book.livro} sandbox="allow-same-origin allow-scripts allow-popups allow-forms" /> : null}
@@ -393,20 +402,5 @@ export const BookDetail = ({
         </div>
       )}
       
-      {/* AI Teacher Component - Only show when reading */}
-      {showAITeacher && (
-        <AITeacher 
-          book={book} 
-          onClose={() => setShowAITeacher(false)}
-          autoOpen={true}
-        />
-      )}
-      
-      {/* Floating Teacher Button - Only show when reading but chat is closed */}
-      {showFloatingButton && !showAITeacher && (
-        <FloatingTeacherButton 
-          onClick={() => setShowAITeacher(true)}
-        />
-      )}
     </div>;
 };

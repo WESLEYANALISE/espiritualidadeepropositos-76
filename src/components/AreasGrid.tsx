@@ -162,7 +162,7 @@ export const AreasGrid = ({
                   
                   {/* Category title */}
                   <div className="absolute bottom-3 left-3 right-3">
-                    <h3 className="text-white font-bold text-lg leading-tight drop-shadow-lg">
+                    <h3 className="text-white font-bold text-lg leading-tight drop-shadow-lg break-words">
                       {area.name}
                     </h3>
                     <p className="text-white/90 text-sm font-medium mt-1">

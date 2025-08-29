@@ -58,8 +58,8 @@ export default function Assinaturas() {
       }
 
       if (data?.url) {
-        console.log('[FRONTEND] Redirecionando para checkout:', data.url);
-        window.location.href = data.url;
+        console.log('[FRONTEND] Abrindo checkout em nova aba:', data.url);
+        window.open(data.url, '_blank');
       } else {
         throw new Error('URL do checkout não foi retornada');
       }

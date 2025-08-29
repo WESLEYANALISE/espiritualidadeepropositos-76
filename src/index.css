@@ -103,5 +103,16 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Fix scroll issues on mobile */
+  .min-h-screen {
+    min-height: 100dvh;
   }
 }

@@ -175,7 +175,7 @@ const Index = () => {
                   className="animate-fade-in-left bg-gradient-primary hover:bg-gradient-primary/90 text-primary-foreground"
                 >
                   <Crown className="h-4 w-4 mr-2" />
-                  Upgrade
+                  Planos
                 </Button>
               )}
           </div>
