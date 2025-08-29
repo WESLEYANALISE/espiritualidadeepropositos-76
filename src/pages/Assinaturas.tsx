@@ -7,13 +7,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { BottomNavigation } from '@/components/BottomNavigation';
 import { ResponsiveNavigation } from '@/components/ResponsiveNavigation';
-import { Browser } from '@capacitor/browser';
-import { Capacitor } from '@capacitor/core';
+import { StripeCheckout } from '@/components/StripeCheckout';
 
 export default function Assinaturas() {
   const { user, subscription, checkSubscription } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState<string | null>(null);
+  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
 
   // Verificar se o usuário cancelou o pagamento
   useEffect(() => {
@@ -61,17 +61,7 @@ export default function Assinaturas() {
 
       if (data?.url) {
         console.log('[FRONTEND] Abrindo checkout:', data.url);
-        
-        if (Capacitor.isNativePlatform()) {
-          // Use native browser for mobile
-          await Browser.open({ 
-            url: data.url,
-            presentationStyle: 'popover'
-          });
-        } else {
-          // Use regular window.open for web
-          window.open(data.url, '_blank');
-        }
+        setCheckoutUrl(data.url);
       } else {
         throw new Error('URL do checkout não foi retornada');
       }
@@ -130,17 +120,7 @@ export default function Assinaturas() {
 
       if (data?.url) {
         console.log('[FRONTEND] Abrindo portal:', data.url);
-        
-        if (Capacitor.isNativePlatform()) {
-          // Use native browser for mobile
-          await Browser.open({ 
-            url: data.url,
-            presentationStyle: 'popover'
-          });
-        } else {
-          // Use regular window.open for web
-          window.open(data.url, '_blank');
-        }
+        setCheckoutUrl(data.url);
       } else {
         throw new Error('URL do portal não foi retornada');
       }
@@ -412,6 +392,19 @@ export default function Assinaturas() {
           </Card>
         )}
       </div>
+      
+      {/* Stripe Checkout Modal */}
+      {checkoutUrl && (
+        <StripeCheckout
+          checkoutUrl={checkoutUrl}
+          onClose={() => setCheckoutUrl(null)}
+          onSuccess={() => {
+            setCheckoutUrl(null);
+            handleRefreshSubscription();
+          }}
+        />
+      )}
+      
       <ResponsiveNavigation />
     </div>
   );
