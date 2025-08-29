@@ -7,6 +7,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { BottomNavigation } from '@/components/BottomNavigation';
 import { ResponsiveNavigation } from '@/components/ResponsiveNavigation';
+import { Browser } from '@capacitor/browser';
+import { Capacitor } from '@capacitor/core';
 
 export default function Assinaturas() {
   const { user, subscription, checkSubscription } = useAuth();
@@ -58,8 +60,18 @@ export default function Assinaturas() {
       }
 
       if (data?.url) {
-        console.log('[FRONTEND] Abrindo checkout em nova aba:', data.url);
-        window.open(data.url, '_blank');
+        console.log('[FRONTEND] Abrindo checkout:', data.url);
+        
+        if (Capacitor.isNativePlatform()) {
+          // Use native browser for mobile
+          await Browser.open({ 
+            url: data.url,
+            presentationStyle: 'popover'
+          });
+        } else {
+          // Use regular window.open for web
+          window.open(data.url, '_blank');
+        }
       } else {
         throw new Error('URL do checkout não foi retornada');
       }
@@ -117,8 +129,18 @@ export default function Assinaturas() {
       }
 
       if (data?.url) {
-        console.log('[FRONTEND] Redirecionando para portal:', data.url);
-        window.open(data.url, '_blank');
+        console.log('[FRONTEND] Abrindo portal:', data.url);
+        
+        if (Capacitor.isNativePlatform()) {
+          // Use native browser for mobile
+          await Browser.open({ 
+            url: data.url,
+            presentationStyle: 'popover'
+          });
+        } else {
+          // Use regular window.open for web
+          window.open(data.url, '_blank');
+        }
       } else {
         throw new Error('URL do portal não foi retornada');
       }

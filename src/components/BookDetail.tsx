@@ -34,10 +34,14 @@ export const BookDetail = ({
   const [canReadToday, setCanReadToday] = useState(true);
   const [hasUsedFreeRead, setHasUsedFreeRead] = useState(false);
   const { readingProgress, markAsReading, stopReading } = useReadingProgress();
+  const [isMarkedAsReading, setIsMarkedAsReading] = useState(false);
   useEffect(() => {
     window.scrollTo(0, 0);
     checkDailyFreeRead();
-  }, [user]);
+    // Check if book is already marked as reading
+    const isCurrentlyReading = readingProgress.some(progress => progress.book_id === book.id);
+    setIsMarkedAsReading(isCurrentlyReading);
+  }, [user, readingProgress, book.id]);
 
   const checkDailyFreeRead = async () => {
     if (!user) return;
@@ -151,16 +155,32 @@ export const BookDetail = ({
         <div className="fixed top-4 left-4 right-4 z-60 flex justify-between">
           <Button 
             onClick={async () => {
-              await markAsReading(book.id);
-              toast({
-                title: 'Livro marcado como lendo',
-                description: 'Você pode ver seus livros em andamento na página "Lendo".',
-              });
+              if (isMarkedAsReading) {
+                await stopReading(book.id);
+                setIsMarkedAsReading(false);
+                toast({
+                  title: 'Removido da lista de leitura',
+                  description: 'Livro removido dos seus livros em andamento.',
+                });
+              } else {
+                await markAsReading(book.id);
+                setIsMarkedAsReading(true);
+                toast({
+                  title: 'Livro marcado como lendo',
+                  description: 'Você pode ver seus livros em andamento na página "Lendo".',
+                });
+              }
             }}
-            className="bg-primary/20 backdrop-blur-sm border border-primary/30 text-foreground hover:bg-primary/30"
+            className={`backdrop-blur-sm border transition-all duration-300 ${
+              isMarkedAsReading 
+                ? 'bg-primary border-primary text-primary-foreground hover:bg-primary/90 animate-scale-in' 
+                : 'bg-primary/20 border-primary/30 text-foreground hover:bg-primary/30'
+            }`}
           >
-            <Plus className="h-4 w-4 mr-2" />
-            Lendo
+            <Plus className={`h-4 w-4 mr-2 transition-transform duration-300 ${
+              isMarkedAsReading ? 'rotate-45' : 'rotate-0'
+            }`} />
+            {isMarkedAsReading ? 'Lendo' : 'Lendo'}
           </Button>
           <Button onClick={() => {
             setShowReader(false);
